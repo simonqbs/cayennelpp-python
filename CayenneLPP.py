@@ -1,3 +1,10 @@
+#
+# This module is basically a rewrite for python for CayenneLPP from TTN Arduino library.
+# I did not include the size checks, as I dont think it is needed?
+#
+# * https://github.com/TheThingsNetwork/arduino-device-lib
+# * https://github.com/TheThingsNetwork/arduino-device-lib/blob/master/src/CayenneLPP.cpp
+#
 import struct
 import math
 
@@ -42,106 +49,110 @@ class CayenneLPP:
         return len(self.buffer)
 
     def add_temperature(self, channel, value):
-        val = math.floor(value * 10);
+        value = math.floor(value * 10);
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_TEMPERATURE))
-        self.buffer.extend(struct.pack('b', val >> 8))
-        self.buffer.extend(struct.pack('b', val))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_TEMPERATURE)
+        self._add_to_buffer(value >> 8)
+        self._add_to_buffer(value)
 
+    # todo should return 65.4 not 65 in cayenne ui
     def add_relative_humidity(self, channel, value):
-        val = math.floor(value * 2)
+        value = math.floor(value * 2)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_RELATIVE_HUMIDITY))
-        self.buffer.extend(struct.pack('b', val))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_RELATIVE_HUMIDITY)
+        self._add_to_buffer(value)
 
     def add_digital_input(self, channel, value):
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_DIGITAL_INPUT))
-        self.buffer.extend(struct.pack('b', value))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_DIGITAL_INPUT)
+        self._add_to_buffer(value)
 
     def add_digital_output(self, channel, value):
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_DIGITAL_OUTPUT))
-        self.buffer.extend(struct.pack('b', value))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_DIGITAL_OUTPUT)
+        self._add_to_buffer(value)
 
     def add_analog_input(self, channel, value):
-        val = math.floor(value * 100)
+        value = math.floor(value * 100)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_ANALOG_INPUT))
-        self.buffer.extend(struct.pack('b', val >> 8))
-        self.buffer.extend(struct.pack('b', val))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_ANALOG_INPUT)
+        self._add_to_buffer(value >> 8)
+        self._add_to_buffer(value)
 
     def add_analog_output(self, channel, value):
-        val = math.floor(value * 100)
+        value = math.floor(value * 100)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_ANALOG_OUTPUT))
-        self.buffer.extend(struct.pack('b', val >> 8))
-        self.buffer.extend(struct.pack('b', val))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_ANALOG_OUTPUT)
+        self._add_to_buffer(value >> 8)
+        self._add_to_buffer(value)
 
     def add_luminosity(self, channel, value):
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_LUMINOSITY))
-        self.buffer.extend(struct.pack('b', value >> 8))
-        self.buffer.extend(struct.pack('b', value))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_LUMINOSITY)
+        self._add_to_buffer(value >> 8)
+        self._add_to_buffer(value)
 
     def add_presence(self, channel, value):
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_PRESENCE))
-        self.buffer.extend(struct.pack('b', value))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_PRESENCE)
+        self._add_to_buffer(value)
 
     def add_accelerometer(self, channel, x, y, z):
         vx = math.floor(x * 1000)
         vy = math.floor(y * 1000)
         vz = math.floor(z * 1000)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_ACCELEROMETER))        
-        self.buffer.extend(struct.pack('b', vx >> 8))
-        self.buffer.extend(struct.pack('b', vx))
-        self.buffer.extend(struct.pack('b', vy >> 8))
-        self.buffer.extend(struct.pack('b', vy))        
-        self.buffer.extend(struct.pack('b', vz >> 8))
-        self.buffer.extend(struct.pack('b', vz))        
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_ACCELEROMETER)      
+        self._add_to_buffer(vx >> 8)
+        self._add_to_buffer(vx)
+        self._add_to_buffer(vy >> 8)
+        self._add_to_buffer(vy)
+        self._add_to_buffer(vz >> 8)
+        self._add_to_buffer(vz)
 
     def add_barometric_pressure(self, channel, value):
-        val = math.floor(value * 10)
+        value = math.floor(value * 10)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_BAROMETRIC_PRESSURE))
-        self.buffer.extend(struct.pack('b', val >> 8))
-        self.buffer.extend(struct.pack('b', val))                
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_BAROMETRIC_PRESSURE)
+        self._add_to_buffer(value >> 8)
+        self._add_to_buffer(value)
 
     def add_gryrometer(self, channel, x, y, z):
         vx = math.floor(x * 100)
         vy = math.floor(y * 100)
         vz = math.floor(z * 100)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_GYROMETER))        
-        self.buffer.extend(struct.pack('b', vx >> 8))
-        self.buffer.extend(struct.pack('b', vx))
-        self.buffer.extend(struct.pack('b', vy >> 8))
-        self.buffer.extend(struct.pack('b', vy))        
-        self.buffer.extend(struct.pack('b', vz >> 8))
-        self.buffer.extend(struct.pack('b', vz))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_GYROMETER)
+        self._add_to_buffer(vx >> 8)
+        self._add_to_buffer(vx)
+        self._add_to_buffer(vy >> 8)
+        self._add_to_buffer(vy) 
+        self._add_to_buffer(vz >> 8)
+        self._add_to_buffer(vz)
 
     def add_gps(self, channel, latitude, longitude, meters):
         lat = math.floor(latitude * 10000)
         lon = math.floor(longitude * 10000)
         alt = math.floor(meters * 100)
 
-        self.buffer.extend(struct.pack('b', channel))
-        self.buffer.extend(struct.pack('b', LPP_GPS))
-        self.buffer.extend(struct.pack('b', lat >> 16))
-        self.buffer.extend(struct.pack('b', lat >> 8))
-        self.buffer.extend(struct.pack('b', lat))
-        self.buffer.extend(struct.pack('b', lon >> 16))
-        self.buffer.extend(struct.pack('b', lon >> 8))
-        self.buffer.extend(struct.pack('b', lon))        
-        self.buffer.extend(struct.pack('b', alt >> 16))
-        self.buffer.extend(struct.pack('b', alt >> 8))
-        self.buffer.extend(struct.pack('b', alt))
+        self._add_to_buffer(channel)
+        self._add_to_buffer(LPP_GPS)
+        self._add_to_buffer(lat >> 16)
+        self._add_to_buffer(lat >> 8)
+        self._add_to_buffer(lat)
+        self._add_to_buffer(lon >> 16)
+        self._add_to_buffer(lon >> 8)
+        self._add_to_buffer(lon)
+        self._add_to_buffer(alt >> 16)
+        self._add_to_buffer(alt >> 8)
+        self._add_to_buffer(alt)
+
+    def _add_to_buffer(self, b):
+        self.buffer.extend(struct.pack('b', b))
